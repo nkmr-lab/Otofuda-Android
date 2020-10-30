@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">Otofuda-Android</string>
     <string name="action_settings">Settings</string>
+    <string-array name="list">
+        <item>Apple</item>
+        <item>Banana</item>
+        <item>Carrot</item>
+    </string-array>
 </resources>

@@ -1,26 +1,89 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout
+
+<androidx.constraintlayout.widget.ConstraintLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".Top.TopVC">
+        tools:context=".Top.TopVC" android:id="@+id/coordinatorLayout">
 
-    <android.support.design.widget.AppBarLayout
-            android:layout_height="wrap_content"
+    <View
             android:layout_width="match_parent"
-            android:theme="@style/AppTheme.AppBarOverlay">
+            android:layout_height="match_parent"
+            android:id="@+id/backgroundView"
+            android:background="#282828"
+            tools:layout_conversion_absoluteHeight="731dp" tools:layout_conversion_absoluteWidth="411dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" app:layout_constraintBottom_toBottomOf="parent"/>
 
-        <android.support.v7.widget.Toolbar
-                android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:background="?attr/colorPrimary"
-                app:popupTheme="@style/AppTheme.PopupOverlay"/>
+    <Button
+            android:id="@+id/button"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:layout_marginStart="50dp"
+            android:layout_marginLeft="50dp"
+            android:layout_marginEnd="50dp"
+            android:layout_marginRight="50dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/button_style"
+            android:onClick="onButtonTapped"
+            android:text="グループを作成"
+            android:textColor="@color/colorAccent"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toTopOf="@+id/searchButton"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:layout_conversion_absoluteHeight="86dp"
+            tools:layout_conversion_absoluteWidth="311dp" />
 
-    </android.support.design.widget.AppBarLayout>
+    <Button
+            android:id="@+id/searchButton"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:layout_marginStart="50dp"
+            android:layout_marginLeft="50dp"
+            android:layout_marginEnd="50dp"
+            android:layout_marginRight="50dp"
+            android:layout_marginBottom="32dp"
+            android:background="@drawable/frame_style"
+            android:text="グループに参加"
+            android:textColor="#FF3366"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:layout_conversion_absoluteHeight="48dp"
+            tools:layout_conversion_absoluteWidth="313dp" />
 
-    <include layout="@layout/content_main"/>
+    <ImageView
+            android:id="@+id/iconImageView"
+            android:layout_width="110dp"
+            android:layout_height="231dp"
+            android:layout_marginTop="196dp"
+            android:src="@drawable/card"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/backgroundView"
+            app:layout_constraintStart_toEndOf="@+id/backgroundView"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.246"
+            tools:layout_conversion_absoluteHeight="250dp"
+            tools:layout_conversion_absoluteWidth="207dp" />
 
-</android.support.design.widget.CoordinatorLayout>
+    <ImageView
+            android:id="@+id/titleImageView"
+            android:layout_width="wrap_content"
+            android:layout_height="188dp"
+            android:layout_marginTop="60dp"
+            android:src="@drawable/title"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:layout_conversion_absoluteHeight="171dp"
+            tools:layout_conversion_absoluteWidth="364dp" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
