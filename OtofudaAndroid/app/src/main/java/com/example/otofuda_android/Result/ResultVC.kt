@@ -50,7 +50,7 @@ class ResultVC : AppCompatActivity() {
                 if( mediaPlayer != null ){
                     mediaPlayer!!.stop()
                 }
-                val url = playMusics[position].preview_url
+                val url = playMusics[position].previewURL
                 mediaPlayer = MediaPlayer().apply {
                     setAudioStreamType(AudioManager.STREAM_MUSIC)
                     setDataSource(url)
@@ -61,7 +61,7 @@ class ResultVC : AppCompatActivity() {
 
             override fun onBadgeClickListener(view: View, position: Int, clickedText: String) {
                 val playMusic = playMusics[position]
-                val storeURL = playMusic.store_url
+                val storeURL = playMusic.storeURL
                 val uri = Uri.parse(storeURL)
                 val intent = Intent(Intent.ACTION_VIEW, uri)
                 startActivity(intent)

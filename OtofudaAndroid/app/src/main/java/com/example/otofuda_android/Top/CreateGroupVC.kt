@@ -35,12 +35,16 @@ class CreateGroupVC : AppCompatActivity() {
     var memberRef: DatabaseReference? = null
     var memberListener: ValueEventListener? = null
 
+    var uuid: String = ""
+
     var roomId = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.create_group)
         supportActionBar?.title = "グループを作成"
+
+        uuid =intent.extras.getString("uuid")
 
         roomId = createGroup()
         observeMember()
@@ -65,7 +69,6 @@ class CreateGroupVC : AppCompatActivity() {
     private fun createGroup(): String {
         val roomId = getRandomStringWithLength(6)
         val roomRef = database.getReference("rooms/" + roomId)
-        val uuid = UUID.randomUUID().toString()
         var member = listOf<String>(uuid)
         val mode = mapOf("playback" to "intro", "score" to "normal", "usingMusic" to "preset")
         val status = "menu"
@@ -80,6 +83,9 @@ class CreateGroupVC : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     fun onCreateButtonTapped(view: View?){
         val intent = Intent(this, MenuVC::class.java)
+        intent.putExtra("roomId", roomId)
+        intent.putExtra("memberId", 0)
+        intent.putExtra( "uuid", uuid )
         startActivity(intent)
         // メンバーのイベントリスナーを削除
         memberRef!!.removeEventListener(memberListener!!)

@@ -34,13 +34,13 @@ class CustomAdapter(private val musicList: ArrayList<Music>): RecyclerView.Adapt
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         val music = musicList[position]
         viewHolder.number.text = (position+1).toString()
-        viewHolder.title.text = music.title
+        viewHolder.title.text = music.name
         viewHolder.artist.text = music.artist
         viewHolder.view.setOnClickListener {
-            listener.onItemClickListener(it, position, musicList[position].title)
+            listener.onItemClickListener(it, position, musicList[position].name!!)
         }
         viewHolder.badgeButton.setOnClickListener {
-            listener.onBadgeClickListener(it, position, musicList[position].title)
+            listener.onBadgeClickListener(it, position, musicList[position].name!!)
         }
 
     }

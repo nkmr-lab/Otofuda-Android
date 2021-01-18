@@ -3,6 +3,7 @@
           package="com.example.otofuda_android">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <application
             android:allowBackup="true"
@@ -25,6 +26,10 @@
         </activity>
         <activity
                 android:name=".Top.CreateGroupVC"
+                android:label="@string/app_name" >
+        </activity>
+        <activity
+                android:name=".Top.SearchGroupVC"
                 android:label="@string/app_name" >
         </activity>
         <activity

@@ -31,9 +31,12 @@ import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
+import java.util.*
 import kotlin.concurrent.thread
 
 class TopVC : AppCompatActivity() {
+
+    val uuid = UUID.randomUUID().toString()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -120,8 +123,16 @@ class TopVC : AppCompatActivity() {
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    fun onButtonTapped(view: View?){
+    fun onCreateButtonTapped(view: View?){
         val intent = Intent(this, CreateGroupVC::class.java)
+        intent.putExtra("uuid", uuid)
+        startActivity(intent)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    fun onSearchButtonTapped(view: View?){
+        val intent = Intent(this, SearchGroupVC::class.java)
+        intent.putExtra("uuid", uuid)
         startActivity(intent)
     }
 

@@ -1,14 +1,13 @@
 package com.example.otofuda_android.Response
 
+import com.google.firebase.database.IgnoreExtraProperties
 import java.io.Serializable
 
+@IgnoreExtraProperties
 data class Music (
-    val title: String,
-    val artist: String,
-    val artwork_url: String,
-    val genere: String,
-    val id: Int,
-    val preview_url: String,
-    val release_date: String,
-    val store_url: String
+    var name: String? = "",
+    var artist: String? = "",
+    var musicOwner: Int? = 0,
+    var storeURL: String? = "",
+    var previewURL: String? = ""
 ): Serializable
