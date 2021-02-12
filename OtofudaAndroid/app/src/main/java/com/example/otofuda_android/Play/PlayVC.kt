@@ -10,8 +10,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import android.view.*
-import android.view.animation.Animation
-import android.view.animation.RotateAnimation
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -21,9 +19,6 @@ import com.example.otofuda_android.R
 import com.example.otofuda_android.Response.Music
 import com.example.otofuda_android.Response.Room
 import com.example.otofuda_android.Result.ResultVC
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.database.ktx.getValue
 import com.google.firebase.ktx.Firebase
@@ -33,6 +28,9 @@ import kotlinx.android.synthetic.main.play.*
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.concurrent.schedule
+import android.media.AudioAttributes
+import android.media.SoundPool
+import com.google.firebase.database.*
 
 class PlayVC : AppCompatActivity() {
 
@@ -54,27 +52,82 @@ class PlayVC : AppCompatActivity() {
 
     var memberId = 0
 
+    var memberCount = 0
+
+    var myColor: Int = Color.RED
+
     var customAdapter: CustomAdapter? = null
+
+    // FIXME: 変数名の変更
+    /* LocationというよりOrderとかIndexesのほうがいいかも */
+    var cardLocations = intArrayOf()
+
+    var playMusicLocations = arrayOf<Int>()
+
+    lateinit var soundPool: SoundPool
+
+    var soundOne = 0
+    var soundTwo = 1
+
+    var isTapped = false
+    var isPlaying = false
+
+    var roomListener: ValueEventListener? = null
+    var statusListener: ValueEventListener? = null
+    var answearUserListener: ValueEventListener? = null
+    var allOtetsukiListener: ValueEventListener? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.play)
-
-        prepareUI()
 
         val cardCount = resources.getInteger(R.integer.cardColumnCount) * resources.getInteger(R.integer.cardRowCount)
 
         uuid = intent.getStringExtra("uuid")
         roomId = intent.getStringExtra("roomId")
         memberId = intent.extras.getInt("memberId")
+        memberCount = intent.extras.getInt("memberCount")
 
-        val cardLocations = intent.getIntArrayExtra("cardLocations")
+        val audioAttributes = AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_GAME)
+            .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+            .build()
+
+        soundPool = SoundPool.Builder()
+            .setAudioAttributes(audioAttributes)
+            // ストリーム数に応じて
+            .setMaxStreams(2)
+            .build()
+
+        // タップした時の効果音 をロードしておく
+        soundOne = soundPool.load(this, R.raw.tap_fuda, 1)
+        soundTwo = soundPool.load(this, R.raw.otetsuki_voice, 1)
+
+        val colors = resources.obtainTypedArray(R.array.userColors)
+        myColor = colors.getColor(memberId, 0)
+
+        // 自分の色などをセット
+        prepareUI()
+
         val playMusicsStr = intent.extras.getString("playMusics")
         playMusics = Gson().fromJson<ArrayList<Music>>(playMusicsStr, object: TypeToken<ArrayList<Music>>(){}.type)
+
+        println("====== 流れる予定の曲 ========")
+        for( (index, playMusic) in playMusics.withIndex() ){
+            println( "$index, " + playMusic.name )
+        }
+        println("================")
+
+        cardLocations = intent.getIntArrayExtra("cardLocations")
 
         for(cardLocation in cardLocations){
             val music = playMusics!![cardLocation]
             orderMusics.add(music)
+        }
+
+        for(i in 0 until cardCount){
+            val playMusicLocation = cardLocations.indexOf(i)
+            playMusicLocations += playMusicLocation
         }
 
         // ホスト以外の時
@@ -91,34 +144,33 @@ class PlayVC : AppCompatActivity() {
         recycler_view.adapter = customAdapter
         recycler_view.layoutManager = GridLayoutManager(this, resources.getInteger(R.integer.cardColumnCount), RecyclerView.VERTICAL, false)
 
+        observeTimestamp()
+
         customAdapter!!.setOnItemClickListener(object: CustomAdapter.OnItemClickListener {
             override fun onItemClickListener(view: View, position: Int, clickedText: String) {
 
-                // 1970年からの秒数
-                val nowTime = Date().time * 60
+                val date = ServerValue.TIMESTAMP
+                var timestampRef = database.getReference("rooms/" + roomId + "/timestamp")
+                timestampRef.setValue(date)
 
-                println( playMusics!![currentIndex-1].name!! )
-                println( orderMusics[position].name!! )
+                // 再生中じゃなかったりタップ済だったら何もしない
+                if( !isPlaying ){ return }
+                if( isTapped ){ return }
+
+                isTapped = true
+                isPlaying = false
 
                 if( playMusics!![currentIndex-1] == orderMusics[position] ) {
 
-
-//                    val textView = view.findViewById(R.id.text_view) as TextView
-//                    textView.setBackgroundColor(Color.RED)
-//                    textView.setTextColor((Color.WHITE))
-
-                    score += 1
-
-                    var statusRef = database.getReference("rooms/" + roomId + "/status")
-                    statusRef.setValue("next")
-
-                    // TODO: 効果音鳴らす処理
                     // FIXME: よくみたらanswerタイポしてる.... iOSの方もそうなのでどっちも変える必要あり
+
                     var answearUserRef = database.getReference("rooms/" + roomId + "/answearUser/" + memberId)
-                    answearUserRef.setValue(mapOf("time" to nowTime, "userIndex" to memberId))
+                    answearUserRef.setValue(mapOf("time" to ServerValue.TIMESTAMP, "userIndex" to memberId))
 
                 } else {
-                    // TODO: 効果音鳴らす処理
+
+                    // play(ロードしたID, 左音量, 右音量, 優先度, ループ, 再生速度)
+                    soundPool.play(soundTwo, 1.0f, 1.0f, 0, 0, 1.0f)
 
                     val otetsukiView =
                         this@PlayVC.findViewById(R.id.otetsukiView) as TextView
@@ -141,54 +193,33 @@ class PlayVC : AppCompatActivity() {
                     var tappedRef = database.getReference("rooms/" + roomId + "/tapped")
                     tappedRef.setValue(tappedDict)
                 }
-
-
-                if( currentIndex == cardCount ){
-                    finishGame()
-                }
-
-                if( memberId == 0 ) {
-                    val readButton = this@PlayVC.findViewById(R.id.readButton) as Button
-                    readButton.visibility = View.VISIBLE
-                }
             }
         })
-
-
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.menu_main, menu)
-
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        return when (item.itemId) {
-            R.id.action_settings -> true
-            else -> super.onOptionsItemSelected(item)
-        }
+        
+        observeAnswearUser()
+        observeAllOtetsuki()
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     fun onReadButtonTapped(view: View?){
         var statusRef = database.getReference("rooms/" + roomId + "/status")
         statusRef.setValue("play")
+
+        var tappedRef = database.getReference("rooms/" + roomId + "/tapped")
+        tappedRef.removeValue()
+
+        var answearUserRef = database.getReference("rooms/" + roomId + "/answearUser")
+        answearUserRef.removeValue()
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     fun onBadgeButtonTapped(view: View?){
-//        if( currentIndex == 0 ){ return }
-//        val playMusic = playMusics!![currentIndex-1]
-//        val storeURL = playMusic.storeURL
-//        val uri = Uri.parse(storeURL)
-//        val intent = Intent(Intent.ACTION_VIEW, uri)
-//        startActivity(intent)
-        customAdapter!!.setOwner(0)
+        if( currentIndex == 0 ){ return }
+        val playMusic = playMusics!![currentIndex-1]
+        val storeURL = playMusic.storeURL
+        val uri = Uri.parse(storeURL)
+        val intent = Intent(Intent.ACTION_VIEW, uri)
+        startActivity(intent)
     }
 
     private fun prepareUI(){
@@ -197,7 +228,7 @@ class PlayVC : AppCompatActivity() {
         val myColorView = this.findViewById(R.id.myColorView) as View
 
         // TODO: memberIdによって色を変える
-        myColorView.setBackgroundColor(Color.RED)
+        myColorView.setBackgroundColor(myColor)
     }
 
     fun finishGame(){
@@ -205,16 +236,40 @@ class PlayVC : AppCompatActivity() {
             mediaPlayer!!.stop()
         }
 
+        var roomRef = database.getReference("rooms/" + roomId)
+
+        if( memberId == 0 ) {
+            roomRef.child("answearUser").removeValue()
+            roomRef.child("cardLocations").removeValue()
+            roomRef.child("playMusics").removeValue()
+            roomRef.child("selectedPlayers").removeValue()
+            roomRef.child("tapped").removeValue()
+        }
+
+        roomRef.removeEventListener(roomListener!!)
+
+        var statusRef = database.getReference("rooms/" + roomId + "/status")
+        statusRef.removeEventListener(statusListener!!)
+
+        var answearUserRef = database.getReference("rooms/" + roomId + "/answearUser")
+        answearUserRef.removeEventListener(answearUserListener!!)
+
+        var tappedRef = database.getReference("rooms/" + roomId + "/tapped")
+        tappedRef.removeEventListener(allOtetsukiListener!!)
+
         val intent = Intent(this, ResultVC::class.java)
         intent.putExtra("playMusics", playMusics)
         intent.putExtra("score", score)
+        intent.putExtra("roomId", roomId)
+        intent.putExtra("memberId", memberId)
+        intent.putExtra( "uuid", uuid )
         startActivity(intent)
     }
 
     fun observeRoom(){
         var roomRef = database.getReference("rooms/" + roomId)
 
-        val roomListener = object : ValueEventListener {
+        roomListener = object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 myRoom = dataSnapshot.getValue<Room>()
             }
@@ -223,19 +278,21 @@ class PlayVC : AppCompatActivity() {
                 Log.w("onCancelled", "error:", error.toException())
             }
         }
-        roomRef.addValueEventListener(roomListener)
+        roomRef.addValueEventListener(roomListener!!)
     }
 
-    private fun observeRoomStatus() {
-        var roomStatusRef = database.getReference("rooms/" + roomId + "/status")
+    fun observeTimestamp(){
+        var timestampRef = database.getReference("rooms/" + roomId + "/timestamp")
+        var isFirst = true
 
-        val roomStatusListener = object : ValueEventListener {
+        var timestampListener = object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                val status = dataSnapshot.getValue<String>()
-                if (status == "play") {
-                    onStatusPlayed()
-                } else if (status == "menu") {
-                    // menuにいく処理
+                val timestamp = dataSnapshot.getValue<Long>()
+                timestamp?.let {
+                    if( !isFirst ) {
+                        println("  timestamp:${timestamp}")
+                    }
+                    isFirst = false
                 }
             }
 
@@ -243,30 +300,62 @@ class PlayVC : AppCompatActivity() {
                 Log.w("onCancelled", "error:", error.toException())
             }
         }
-        roomStatusRef.addValueEventListener(roomStatusListener)
+
+        timestampRef.addValueEventListener(timestampListener!!)
     }
 
+    private fun observeRoomStatus() {
+        var statusRef = database.getReference("rooms/" + roomId + "/status")
+
+        statusListener = object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                val status = dataSnapshot.getValue<String>()
+                if (status == "play") {
+                    onStatusPlayed()
+                } else if (status == "menu") {
+                    // menuにいく処理
+                } else if ( status == "next" ){
+                    if( memberId == 0 ) {
+                        val readButton = this@PlayVC.findViewById(R.id.readButton) as Button
+                        readButton.visibility = View.VISIBLE
+                    }
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.w("onCancelled", "error:", error.toException())
+            }
+        }
+        statusRef.addValueEventListener(statusListener!!)
+    }
+
+
+    /* 誰かが正解したらこの関数が呼ばれる */
     private fun observeAnswearUser(){
         var answearUserRef = database.getReference("rooms/" + roomId + "/answearUser")
 
-        val answearUserListener = object : ValueEventListener {
+        answearUserListener = object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if( dataSnapshot.childrenCount.toInt() == 0 ){
                     return
                 }
 
+                println( "=====================" )
+                println( dataSnapshot.value )
+                println( "=====================" )
+
                 var fastestUser = -1
-                var fastestTime = Double.MAX_VALUE
+                var fastestTime = Long.MAX_VALUE
 
                 for( item in dataSnapshot.children ){
                     val snapshot = item!!
                     val dict = snapshot.value as Map<String, Any>
 
-                    val userIndex = dict["userIndex"] as Int
-                    val time = dict["time"] as Double
+                    val userIndex = dict["userIndex"] as Long
+                    val time = dict["time"] as Long
 
                     if( time < fastestTime ){
-                        fastestUser = userIndex
+                        fastestUser = userIndex.toInt()
                         fastestTime = time
                     }
                 }
@@ -274,16 +363,73 @@ class PlayVC : AppCompatActivity() {
                 // タップされた札の色をanswearUserにする
                 val currentMusic = playMusics[currentIndex - 1]
                 currentMusic.musicOwner = fastestUser
-//                currentMusic.
 
+                val playMusicLocation = playMusicLocations[currentIndex-1]
 
+                val colors = resources.obtainTypedArray(R.array.userColors)
+                val color = colors.getColor(fastestUser, 0)
+
+                customAdapter!!.setOwner(playMusicLocation, color)
+
+                // 自分だったら得点を追加する
+                if( fastestUser == memberId ){
+                    score += 1
+
+                    // play(ロードしたID, 左音量, 右音量, 優先度, ループ, 再生速度)
+                    soundPool.play(soundOne, 1.0f, 1.0f, 0, 0, 1.0f)
+                }
+
+                val cardCount = resources.getInteger(R.integer.cardColumnCount) * resources.getInteger(R.integer.cardRowCount)
+                if( currentIndex == cardCount ){
+                    finishGame()
+                    return
+                }
+
+                isPlaying = false
+                isTapped = false
+
+                // 次の曲に進む
+                var statusRef = database.getReference("rooms/" + roomId + "/status")
+                statusRef.setValue("next")
             }
 
             override fun onCancelled(error: DatabaseError) {
                 Log.w("onCancelled", "error:", error.toException())
             }
         }
-        answearUserRef.addValueEventListener(answearUserListener)
+        answearUserRef.addValueEventListener(answearUserListener!!)
+    }
+
+    /* 全員がお手つきした時はこの関数が呼ばれる */
+    fun observeAllOtetsuki(){
+
+        var tappedRef = database.getReference("rooms/" + roomId + "/tapped")
+
+        allOtetsukiListener = object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                if( dataSnapshot.childrenCount.toInt() != memberCount ){
+                    return
+                }
+
+                val cardCount = resources.getInteger(R.integer.cardColumnCount) * resources.getInteger(R.integer.cardRowCount)
+                if( currentIndex == cardCount ){
+                    finishGame()
+                    return
+                }
+
+                isPlaying = false
+                isTapped = false
+
+                // 次の曲に進む
+                var statusRef = database.getReference("rooms/" + roomId + "/status")
+                statusRef.setValue("next")
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.w("onCancelled", "error:", error.toException())
+            }
+        }
+        tappedRef.addValueEventListener(allOtetsukiListener!!)
     }
 
     fun onStatusPlayed(){
@@ -318,6 +464,8 @@ class PlayVC : AppCompatActivity() {
                         timer.cancel()
                         countDownText.visibility = View.INVISIBLE
 
+                        isPlaying = true
+
                         val playMusic = playMusics!![currentIndex]
                         val musicOwner = playMusics!![currentIndex].musicOwner!!
 
@@ -326,7 +474,8 @@ class PlayVC : AppCompatActivity() {
                             mediaPlayer = MediaPlayer().apply {
                                 setAudioStreamType(AudioManager.STREAM_MUSIC)
                                 setDataSource(url)
-                                prepare() // might take long! (for buffering, etc)
+                                isLooping = true
+                                prepare()
                                 start()
                             }
                         }

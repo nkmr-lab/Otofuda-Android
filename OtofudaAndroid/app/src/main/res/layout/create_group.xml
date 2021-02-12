@@ -7,7 +7,7 @@
                                             android:background="#282828">
 
     <Button
-            android:id="@+id/button3"
+            android:id="@+id/nextButton"
             android:layout_width="247dp"
             android:layout_height="84dp"
             android:layout_marginBottom="72dp"
@@ -31,7 +31,7 @@
             android:layout_marginLeft="80dp"
             android:layout_marginEnd="80dp"
             android:layout_marginRight="80dp"
-            app:layout_constraintBottom_toTopOf="@+id/button3"
+            app:layout_constraintBottom_toTopOf="@+id/nextButton"
             app:layout_constraintDimensionRatio="1:1"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -43,7 +43,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dp"
             android:orientation="horizontal"
-            app:layout_constraintBottom_toTopOf="@+id/button3"
+            app:layout_constraintBottom_toTopOf="@+id/nextButton"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
 

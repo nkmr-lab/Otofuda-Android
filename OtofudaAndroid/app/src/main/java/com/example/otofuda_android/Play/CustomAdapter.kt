@@ -57,7 +57,7 @@ class CustomAdapter(private val musicList: ArrayList<Music>): RecyclerView.Adapt
         this.listener = listener
     }
 
-    fun setOwner(position: Int, owner: Int){
+    fun setOwner(position: Int, color: Int){
         val rotate = RotateAnimation(
             0.0f, 360.0f * 5,
             Animation.RELATIVE_TO_SELF, 0.5f,
@@ -73,7 +73,7 @@ class CustomAdapter(private val musicList: ArrayList<Music>): RecyclerView.Adapt
         view.startAnimation(rotate)
 
         val textView = view.findViewById(R.id.text_view) as TextView
-        textView.setBackgroundColor(owner)
+        textView.setBackgroundColor(color)
         textView.setTextColor((Color.WHITE))
     }
 }

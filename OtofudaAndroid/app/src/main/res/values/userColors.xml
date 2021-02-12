@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color-array name="list">
-         <item></item>
-    </color-array>
-    <color name="colorPrimary">#FF3366</color>
-    <color name="colorPrimaryDark">#00574B</color>
-    <color name="colorAccent">#FFFFFF</color>
-    <color name="colorBackDark">#282828</color>
+    <array name="userColors">
+        <item>#FFFF0000</item>
+        <item>#FF0000FF</item>
+        <item>#FF00FF00</item>
+        <item>#FF8800FF</item>
+        <item>#FFAA7942</item>
+        <item>#FFFFFF00</item>
+        <item>#FFFF9300</item>
+    </array>
 </resources>

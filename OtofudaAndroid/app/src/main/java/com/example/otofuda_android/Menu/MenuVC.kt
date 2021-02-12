@@ -5,13 +5,8 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.FrameLayout
-import android.widget.Spinner
+import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.example.otofuda_android.Play.PlayVC
@@ -67,6 +62,10 @@ class MenuVC : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.menu)
 
+        // プリセットが読み込まれるまではボタンを押せないようにする
+        var nextButton = this.findViewById(R.id.nextButton) as Button
+        nextButton.isClickable = false
+
         supportActionBar?.title = "ルールを選択"
 
         uuid =intent.extras.getString("uuid")
@@ -74,8 +73,6 @@ class MenuVC : AppCompatActivity() {
         memberId = intent.extras.getInt("memberId")
 
         observeRoom()
-
-
 
         presetGroupSpinner = this.findViewById(R.id.spinner1) as Spinner
         presetTitleSpinner = this.findViewById(R.id.spinner2) as Spinner
@@ -148,6 +145,8 @@ class MenuVC : AppCompatActivity() {
                     presetTitleAdapter.setDropDownViewResource(R.layout.custom_spinner_dropdown)
                     presetTitleSpinner!!.setAdapter(presetTitleAdapter)
 
+                    nextButton.isClickable = true
+
                     presetGroupSpinner!!.onItemSelectedListener =
                         object : AdapterView.OnItemSelectedListener {
 
@@ -211,13 +210,6 @@ class MenuVC : AppCompatActivity() {
         }
 
 
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.menu_main, menu)
-
-        return true
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
@@ -306,6 +298,7 @@ class MenuVC : AppCompatActivity() {
         intent.putExtra("playMusics", Gson().toJson(playMusics))
         intent.putExtra("cardLocations", myRoom?.cardLocations?.toIntArray())
         intent.putExtra("memberId", memberId)
+        intent.putExtra("memberCount", myRoom?.member?.size)
         startActivity(intent)
     }
 
@@ -345,13 +338,5 @@ class MenuVC : AppCompatActivity() {
         roomRef.addValueEventListener(roomListener)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        return when (item.itemId) {
-            R.id.action_settings -> true
-            else -> super.onOptionsItemSelected(item)
-        }
-    }
+    override fun onBackPressed() {}
 }

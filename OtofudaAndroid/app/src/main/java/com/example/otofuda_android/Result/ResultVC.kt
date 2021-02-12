@@ -15,6 +15,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.otofuda_android.Menu.MenuVC
 import com.example.otofuda_android.R
 import com.example.otofuda_android.Response.Music
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
 import kotlin.collections.ArrayList
 
 class ResultVC : AppCompatActivity() {
@@ -25,6 +27,15 @@ class ResultVC : AppCompatActivity() {
 
     var mediaPlayer: MediaPlayer? = null
 
+    var uuid = ""
+
+    var roomId = ""
+
+    var memberId = 0
+
+    val database = Firebase.database
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.result)
@@ -33,6 +44,9 @@ class ResultVC : AppCompatActivity() {
 
         playMusics = intent.getSerializableExtra("playMusics") as ArrayList<Music>
         score = intent.getIntExtra("score", 0)
+        uuid = intent.getStringExtra("uuid")
+        roomId = intent.getStringExtra("roomId")
+        memberId = intent.extras.getInt("memberId")
 
         var scoreLabel = this.findViewById(R.id.scoreLabel) as TextView
         scoreLabel.text = score.toString() + "点"
@@ -54,6 +68,7 @@ class ResultVC : AppCompatActivity() {
                 mediaPlayer = MediaPlayer().apply {
                     setAudioStreamType(AudioManager.STREAM_MUSIC)
                     setDataSource(url)
+                    isLooping = true
                     prepare() // might take long! (for buffering, etc)
                     start()
                 }
@@ -71,26 +86,16 @@ class ResultVC : AppCompatActivity() {
         })
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.menu_main, menu)
-
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        return when (item.itemId) {
-            R.id.action_settings -> true
-            else -> super.onOptionsItemSelected(item)
-        }
-    }
-
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     fun onRestartButtonTapped(view: View?){
+        var statusRef = database.getReference("rooms/" + roomId + "/status")
+        statusRef.setValue("menu")
+
         val intent = Intent(this, MenuVC::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.putExtra("roomId", roomId)
+        intent.putExtra("memberId", memberId)
+        intent.putExtra( "uuid", uuid )
         startActivity(intent)
     }
 }
