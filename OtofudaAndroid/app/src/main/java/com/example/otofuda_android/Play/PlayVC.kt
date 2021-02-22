@@ -30,6 +30,7 @@ import kotlin.collections.ArrayList
 import kotlin.concurrent.schedule
 import android.media.AudioAttributes
 import android.media.SoundPool
+import com.example.otofuda_android.Menu.MenuVC
 import com.google.firebase.database.*
 
 class PlayVC : AppCompatActivity() {
@@ -88,6 +89,9 @@ class PlayVC : AppCompatActivity() {
         memberId = intent.extras.getInt("memberId")
         memberCount = intent.extras.getInt("memberCount")
 
+        var musicCountRef = database.getReference("rooms/" + roomId + "/musicCounts/" + memberId)
+        musicCountRef.setValue(0)
+
         val audioAttributes = AudioAttributes.Builder()
             .setUsage(AudioAttributes.USAGE_GAME)
             .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
@@ -144,8 +148,6 @@ class PlayVC : AppCompatActivity() {
         recycler_view.adapter = customAdapter
         recycler_view.layoutManager = GridLayoutManager(this, resources.getInteger(R.integer.cardColumnCount), RecyclerView.VERTICAL, false)
 
-        observeTimestamp()
-
         customAdapter!!.setOnItemClickListener(object: CustomAdapter.OnItemClickListener {
             override fun onItemClickListener(view: View, position: Int, clickedText: String) {
 
@@ -167,6 +169,7 @@ class PlayVC : AppCompatActivity() {
                     var answearUserRef = database.getReference("rooms/" + roomId + "/answearUser/" + memberId)
                     answearUserRef.setValue(mapOf("time" to ServerValue.TIMESTAMP, "userIndex" to memberId))
 
+
                 } else {
 
                     // play(ロードしたID, 左音量, 右音量, 優先度, ループ, 再生速度)
@@ -180,19 +183,9 @@ class PlayVC : AppCompatActivity() {
                 }
 
                 // tappedに追加処理
-                if( myRoom?.tapped == null ){
-                    var tappedDict =  listOf<Map<String, Any>>()
-                    var userDict = mapOf("name" to uuid)
-                    tappedDict += mapOf( "user" to userDict, "music" to orderMusics[position].name!! )
-                    var tappedRef = database.getReference("rooms/" + roomId + "/tapped")
-                    tappedRef.setValue(tappedDict)
-                } else {
-                    var tappedDict = myRoom!!.tapped!!
-                    var userDict = mapOf("name" to uuid)
-                    tappedDict += mapOf( "user" to userDict, "music" to orderMusics[position].name!! )
-                    var tappedRef = database.getReference("rooms/" + roomId + "/tapped")
-                    tappedRef.setValue(tappedDict)
-                }
+                var userDict = mapOf("name" to uuid)
+                var tappedRef = database.getReference("rooms/" + roomId + "/tapped/" + memberId)
+                tappedRef.setValue(userDict)
             }
         })
         
@@ -222,12 +215,18 @@ class PlayVC : AppCompatActivity() {
         startActivity(intent)
     }
 
+    override fun onBackPressed() {
+        // ホストだけ戻る操作を可能にする
+        if( memberId == 0 ) {
+            var statusRef = database.getReference("rooms/" + roomId + "/status")
+            statusRef.setValue("menu")
+        }
+    }
+
     private fun prepareUI(){
         supportActionBar?.title = "1曲目"
 
         val myColorView = this.findViewById(R.id.myColorView) as View
-
-        // TODO: memberIdによって色を変える
         myColorView.setBackgroundColor(myColor)
     }
 
@@ -256,10 +255,22 @@ class PlayVC : AppCompatActivity() {
 
         var tappedRef = database.getReference("rooms/" + roomId + "/tapped")
         tappedRef.removeEventListener(allOtetsukiListener!!)
+    }
 
+    fun goResultVC(){
         val intent = Intent(this, ResultVC::class.java)
         intent.putExtra("playMusics", playMusics)
         intent.putExtra("score", score)
+        intent.putExtra("roomId", roomId)
+        intent.putExtra("memberId", memberId)
+        intent.putExtra( "uuid", uuid )
+        intent.putExtra("memberCount", memberCount)
+        startActivity(intent)
+    }
+
+    fun goMenuVC(){
+        val intent = Intent(this, MenuVC::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         intent.putExtra("roomId", roomId)
         intent.putExtra("memberId", memberId)
         intent.putExtra( "uuid", uuid )
@@ -281,29 +292,6 @@ class PlayVC : AppCompatActivity() {
         roomRef.addValueEventListener(roomListener!!)
     }
 
-    fun observeTimestamp(){
-        var timestampRef = database.getReference("rooms/" + roomId + "/timestamp")
-        var isFirst = true
-
-        var timestampListener = object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                val timestamp = dataSnapshot.getValue<Long>()
-                timestamp?.let {
-                    if( !isFirst ) {
-                        println("  timestamp:${timestamp}")
-                    }
-                    isFirst = false
-                }
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                Log.w("onCancelled", "error:", error.toException())
-            }
-        }
-
-        timestampRef.addValueEventListener(timestampListener!!)
-    }
-
     private fun observeRoomStatus() {
         var statusRef = database.getReference("rooms/" + roomId + "/status")
 
@@ -314,7 +302,20 @@ class PlayVC : AppCompatActivity() {
                     onStatusPlayed()
                 } else if (status == "menu") {
                     // menuにいく処理
+                    finishGame()
+                    goMenuVC()
                 } else if ( status == "next" ){
+                    val cardCount = resources.getInteger(R.integer.cardColumnCount) * resources.getInteger(R.integer.cardRowCount)
+                    if( currentIndex == cardCount ) {
+
+                        // 正解者が更新される場合があるので, 終了処理を3秒待つ
+                        Handler().postDelayed(Runnable {
+                            finishGame()
+                            goResultVC()
+                        }, 3000)
+                        return
+                    }
+
                     if( memberId == 0 ) {
                         val readButton = this@PlayVC.findViewById(R.id.readButton) as Button
                         readButton.visibility = View.VISIBLE
@@ -329,14 +330,36 @@ class PlayVC : AppCompatActivity() {
         statusRef.addValueEventListener(statusListener!!)
     }
 
-
     /* 誰かが正解したらこの関数が呼ばれる */
     private fun observeAnswearUser(){
         var answearUserRef = database.getReference("rooms/" + roomId + "/answearUser")
+        var preDataSnapshot: DataSnapshot? = null
 
         answearUserListener = object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if( dataSnapshot.childrenCount.toInt() == 0 ){
+                    preDataSnapshot = dataSnapshot
+                    return
+                }
+
+                // FIXME: 同時タップ処理がうまくいかなくなった
+                // FIXME: コードがくそ見づらくなってしまったのでどうにかする
+                // ここで前の値のanswerUser[memberID]に値がない場合は推測値なので, 無視する
+                // そもそも前のsnapshotがnullだったら無視
+                if( preDataSnapshot == null ){
+                    println( "==== preDataSnapshot is null ======" )
+                    preDataSnapshot = dataSnapshot
+                    return
+                }
+
+                val preHasSelfId = preDataSnapshot!!.hasChild(memberId.toString())
+                val hasSelfId = dataSnapshot.hasChild(memberId.toString())
+
+                val isFirstTimestamp = !preHasSelfId && hasSelfId
+
+                if( isFirstTimestamp ){
+                    println( "==== is First Timestamp ======" )
+                    preDataSnapshot = dataSnapshot
                     return
                 }
 
@@ -347,14 +370,14 @@ class PlayVC : AppCompatActivity() {
                 var fastestUser = -1
                 var fastestTime = Long.MAX_VALUE
 
-                for( item in dataSnapshot.children ){
+                for( item in dataSnapshot.children ) {
                     val snapshot = item!!
                     val dict = snapshot.value as Map<String, Any>
 
                     val userIndex = dict["userIndex"] as Long
                     val time = dict["time"] as Long
 
-                    if( time < fastestTime ){
+                    if( time < fastestTime ) {
                         fastestUser = userIndex.toInt()
                         fastestTime = time
                     }
@@ -362,7 +385,7 @@ class PlayVC : AppCompatActivity() {
 
                 // タップされた札の色をanswearUserにする
                 val currentMusic = playMusics[currentIndex - 1]
-                currentMusic.musicOwner = fastestUser
+                currentMusic.cardOwner = fastestUser
 
                 val playMusicLocation = playMusicLocations[currentIndex-1]
 
@@ -379,18 +402,14 @@ class PlayVC : AppCompatActivity() {
                     soundPool.play(soundOne, 1.0f, 1.0f, 0, 0, 1.0f)
                 }
 
-                val cardCount = resources.getInteger(R.integer.cardColumnCount) * resources.getInteger(R.integer.cardRowCount)
-                if( currentIndex == cardCount ){
-                    finishGame()
-                    return
-                }
-
                 isPlaying = false
                 isTapped = false
 
                 // 次の曲に進む
                 var statusRef = database.getReference("rooms/" + roomId + "/status")
                 statusRef.setValue("next")
+
+                preDataSnapshot = dataSnapshot
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -440,7 +459,6 @@ class PlayVC : AppCompatActivity() {
             mediaPlayer!!.stop()
         }
 
-
         val readButton = this.findViewById(R.id.readButton) as Button
         readButton.visibility = View.GONE
 
@@ -450,7 +468,6 @@ class PlayVC : AppCompatActivity() {
 
         val otetsukiView = this.findViewById(R.id.otetsukiView) as TextView
         otetsukiView.visibility = View.GONE
-
 
         var count = 3
         val handler = Handler()

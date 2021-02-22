@@ -181,6 +181,7 @@ class MenuVC : AppCompatActivity() {
         val usingMusicSegment = this.findViewById(R.id.usingMusicSegment) as SegmentedGroup
         val scoreModeSegment = this.findViewById(R.id.scoreSegment) as SegmentedGroup
         val playbackModeSegment = this.findViewById(R.id.playbackSegment) as SegmentedGroup
+        val cardCountSegment = this.findViewById(R.id.cardCountSegment) as SegmentedGroup
 
         usingMusicSegment.setOnSegmentedGroupListener { tab, checkedId ->
             var usingMusicModeRef = database.getReference("rooms/" + roomId + "/mode/usingMusic")
@@ -206,6 +207,17 @@ class MenuVC : AppCompatActivity() {
                 playbackModeRef.setValue("intro")
             } else if (tab.text == "ランダム") {
                 playbackModeRef.setValue("random")
+            }
+        }
+
+        cardCountSegment.setOnSegmentedGroupListener { tab, checkedId ->
+            var cardCountModeRef = database.getReference("rooms/" + roomId + "/mode/cardCount")
+            if (tab.text == "2x2") {
+                cardCountModeRef.setValue("2x2")
+            } else if (tab.text == "3x3") {
+                cardCountModeRef.setValue("3x3")
+            } else if (tab.text == "4x4") {
+                cardCountModeRef.setValue("4x4")
             }
         }
 
@@ -270,6 +282,7 @@ class MenuVC : AppCompatActivity() {
                     selectedMusics[i].title,
                     selectedMusics[i].artist,
                     player,
+                    -1,
                     selectedMusics[i].store_url,
                     selectedMusics[i].preview_url
                 )
@@ -282,14 +295,7 @@ class MenuVC : AppCompatActivity() {
 
         var playMusics = arrayListOf<Music>()
         for(playMusic in myRoom?.playMusics!!){
-            var music = Music(
-                playMusic.get("name") as String,
-                playMusic.get("artist") as String,
-                (playMusic.get("musicOwner") as Long).toInt(),
-                playMusic.get("storeURL") as String,
-                playMusic.get("previewURL") as String
-            )
-            playMusics.add(music)
+            playMusics.add(playMusic)
         }
 
         val intent = Intent(this, PlayVC::class.java)
@@ -338,5 +344,6 @@ class MenuVC : AppCompatActivity() {
         roomRef.addValueEventListener(roomListener)
     }
 
+    @Override
     override fun onBackPressed() {}
 }

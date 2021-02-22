@@ -4,9 +4,12 @@ import android.content.Intent
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.net.Uri
+import android.opengl.Visibility
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.*
+import android.widget.Button
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -15,7 +18,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.otofuda_android.Menu.MenuVC
 import com.example.otofuda_android.R
 import com.example.otofuda_android.Response.Music
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
+import com.google.firebase.database.ktx.getValue
 import com.google.firebase.ktx.Firebase
 import kotlin.collections.ArrayList
 
@@ -33,8 +40,11 @@ class ResultVC : AppCompatActivity() {
 
     var memberId = 0
 
+    var memberCount = 0
+
     val database = Firebase.database
 
+    var statusListener: ValueEventListener? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,18 +56,44 @@ class ResultVC : AppCompatActivity() {
         score = intent.getIntExtra("score", 0)
         uuid = intent.getStringExtra("uuid")
         roomId = intent.getStringExtra("roomId")
-        memberId = intent.extras.getInt("memberId")
+        memberId = intent.getIntExtra("memberId", 0)
+        memberCount = intent.getIntExtra("memberCount", 0)
+
+        var winnerLabel = this.findViewById(R.id.winnerLabel) as TextView
+
+        var eachScores = IntArray(memberCount)
+        for ( music in playMusics ){
+
+            // 誰も取ってないカードはカウントしない
+            if( music.cardOwner != -1 ) {
+                eachScores[music.cardOwner!!] += 1
+            }
+        }
+
+        if ( eachScores[memberId] == eachScores.max() ){
+            if ( eachScores.filter { it == eachScores.max() }.size > 1 ){
+                winnerLabel.text = "引き分け"
+            } else {
+                winnerLabel.text = "あなたの勝利"
+            }
+        } else {
+            winnerLabel.text = "あなたの敗北"
+        }
+
 
         var scoreLabel = this.findViewById(R.id.scoreLabel) as TextView
-        scoreLabel.text = score.toString() + "点"
+        scoreLabel.text = eachScores[memberId].toString() + "点"
 
-        println(playMusics)
+        val retryButton = this.findViewById(R.id.retryButton) as Button
+        if( memberId != 0 ){
+            retryButton.visibility = Button.GONE
+        }
 
-        val recycler_view = this.findViewById(R.id.result_recycler_view) as RecyclerView
+        val recyclerView = this.findViewById(R.id.result_recycler_view) as RecyclerView
 
         val customAdapter = CustomAdapter(playMusics)
-        recycler_view.adapter = customAdapter
-        recycler_view.layoutManager = GridLayoutManager(this, 1, RecyclerView.VERTICAL, false)
+        recyclerView.adapter = customAdapter
+        recyclerView.layoutManager = GridLayoutManager(this, 1, RecyclerView.VERTICAL, false)
 
         customAdapter.setOnItemClickListener(object: CustomAdapter.OnItemClickListener {
             override fun onItemClickListener(view: View, position: Int, clickedText: String) {
@@ -82,20 +118,39 @@ class ResultVC : AppCompatActivity() {
                 startActivity(intent)
             }
 
-
         })
+
+        observeRoomStatus()
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     fun onRestartButtonTapped(view: View?){
         var statusRef = database.getReference("rooms/" + roomId + "/status")
         statusRef.setValue("menu")
+    }
 
-        val intent = Intent(this, MenuVC::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.putExtra("roomId", roomId)
-        intent.putExtra("memberId", memberId)
-        intent.putExtra( "uuid", uuid )
-        startActivity(intent)
+    private fun observeRoomStatus() {
+        var statusRef = database.getReference("rooms/" + roomId + "/status")
+
+        statusListener = object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                val status = dataSnapshot.getValue<String>()
+                if (status == "menu") {
+                    statusRef.removeEventListener(statusListener!!)
+
+                    val intent = Intent(this@ResultVC, MenuVC::class.java)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    intent.putExtra("roomId", roomId)
+                    intent.putExtra("memberId", memberId)
+                    intent.putExtra( "uuid", uuid )
+                    startActivity(intent)
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.w("onCancelled", "error:", error.toException())
+            }
+        }
+        statusRef.addValueEventListener(statusListener!!)
     }
 }

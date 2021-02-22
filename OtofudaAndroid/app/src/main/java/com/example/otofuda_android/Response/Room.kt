@@ -13,7 +13,7 @@ data class Room(
     var cardLocations: List<Int>? = null,
     var selectedPlayers: List<Int>? = null,
     var musicCounts: List<Int>? = null,
-    var playMusics: List<Map<String, Any>>? = null,
+    var playMusics: List<Music>? = null,
     var tapped: List<Map<String, Any>>? = null,
     var answearUser: List<Map<String, Any>>? = null // これでいいんか？
 ): Serializable
