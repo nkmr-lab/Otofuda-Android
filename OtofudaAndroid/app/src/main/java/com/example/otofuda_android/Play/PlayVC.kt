@@ -55,6 +55,10 @@ class PlayVC : AppCompatActivity() {
 
     var memberCount = 0
 
+    var cardCount = 0
+    var cardColumnCount = 0
+    var cardRowCount = 0
+
     var myColor: Int = Color.RED
 
     var customAdapter: CustomAdapter? = null
@@ -82,12 +86,13 @@ class PlayVC : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.play)
 
-        val cardCount = resources.getInteger(R.integer.cardColumnCount) * resources.getInteger(R.integer.cardRowCount)
-
         uuid = intent.getStringExtra("uuid")
         roomId = intent.getStringExtra("roomId")
         memberId = intent.extras.getInt("memberId")
         memberCount = intent.extras.getInt("memberCount")
+        cardCount = intent.extras.getInt("cardCount")
+        cardColumnCount = intent.extras.getInt("cardColumnCount")
+        cardRowCount = intent.extras.getInt("cardRowCount")
 
         var musicCountRef = database.getReference("rooms/" + roomId + "/musicCounts/" + memberId)
         musicCountRef.setValue(0)
@@ -144,16 +149,12 @@ class PlayVC : AppCompatActivity() {
         observeRoom()
 
         customAdapter = CustomAdapter(orderMusics)
-        customAdapter!!.setColmunRow(resources.getInteger(R.integer.cardColumnCount), resources.getInteger(R.integer.cardRowCount))
+        customAdapter!!.setColmunRow(cardColumnCount, cardRowCount)
         recycler_view.adapter = customAdapter
-        recycler_view.layoutManager = GridLayoutManager(this, resources.getInteger(R.integer.cardColumnCount), RecyclerView.VERTICAL, false)
+        recycler_view.layoutManager = GridLayoutManager(this, cardColumnCount, RecyclerView.VERTICAL, false)
 
         customAdapter!!.setOnItemClickListener(object: CustomAdapter.OnItemClickListener {
             override fun onItemClickListener(view: View, position: Int, clickedText: String) {
-
-                val date = ServerValue.TIMESTAMP
-                var timestampRef = database.getReference("rooms/" + roomId + "/timestamp")
-                timestampRef.setValue(date)
 
                 // 再生中じゃなかったりタップ済だったら何もしない
                 if( !isPlaying ){ return }
@@ -165,7 +166,6 @@ class PlayVC : AppCompatActivity() {
                 if( playMusics!![currentIndex-1] == orderMusics[position] ) {
 
                     // FIXME: よくみたらanswerタイポしてる.... iOSの方もそうなのでどっちも変える必要あり
-
                     var answearUserRef = database.getReference("rooms/" + roomId + "/answearUser/" + memberId)
                     answearUserRef.setValue(mapOf("time" to ServerValue.TIMESTAMP, "userIndex" to memberId))
 
@@ -265,6 +265,9 @@ class PlayVC : AppCompatActivity() {
         intent.putExtra("memberId", memberId)
         intent.putExtra( "uuid", uuid )
         intent.putExtra("memberCount", memberCount)
+        intent.putExtra("cardCount", cardCount)
+        intent.putExtra("cardColumnCount", cardColumnCount)
+        intent.putExtra("cardRowCount", cardRowCount)
         startActivity(intent)
     }
 
@@ -274,6 +277,10 @@ class PlayVC : AppCompatActivity() {
         intent.putExtra("roomId", roomId)
         intent.putExtra("memberId", memberId)
         intent.putExtra( "uuid", uuid )
+        intent.putExtra("cardCount", cardCount)
+        intent.putExtra("cardColumnCount", cardColumnCount)
+        intent.putExtra("cardRowCount", cardRowCount)
+
         startActivity(intent)
     }
 
@@ -305,7 +312,6 @@ class PlayVC : AppCompatActivity() {
                     finishGame()
                     goMenuVC()
                 } else if ( status == "next" ){
-                    val cardCount = resources.getInteger(R.integer.cardColumnCount) * resources.getInteger(R.integer.cardRowCount)
                     if( currentIndex == cardCount ) {
 
                         // 正解者が更新される場合があるので, 終了処理を3秒待つ
@@ -427,12 +433,6 @@ class PlayVC : AppCompatActivity() {
         allOtetsukiListener = object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if( dataSnapshot.childrenCount.toInt() != memberCount ){
-                    return
-                }
-
-                val cardCount = resources.getInteger(R.integer.cardColumnCount) * resources.getInteger(R.integer.cardRowCount)
-                if( currentIndex == cardCount ){
-                    finishGame()
                     return
                 }
 

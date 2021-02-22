@@ -46,6 +46,10 @@ class ResultVC : AppCompatActivity() {
 
     var statusListener: ValueEventListener? = null
 
+    var cardCount = 0
+    var cardColumnCount = 0
+    var cardRowCount = 0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.result)
@@ -58,6 +62,9 @@ class ResultVC : AppCompatActivity() {
         roomId = intent.getStringExtra("roomId")
         memberId = intent.getIntExtra("memberId", 0)
         memberCount = intent.getIntExtra("memberCount", 0)
+        cardCount = intent.extras.getInt("cardCount")
+        cardColumnCount = intent.extras.getInt("cardColumnCount")
+        cardRowCount = intent.extras.getInt("cardRowCount")
 
         var winnerLabel = this.findViewById(R.id.winnerLabel) as TextView
 
@@ -143,6 +150,9 @@ class ResultVC : AppCompatActivity() {
                     intent.putExtra("roomId", roomId)
                     intent.putExtra("memberId", memberId)
                     intent.putExtra( "uuid", uuid )
+                    intent.putExtra("cardCount", cardCount)
+                    intent.putExtra("cardColumnCount", cardColumnCount)
+                    intent.putExtra("cardRowCount", cardRowCount)
                     startActivity(intent)
                 }
             }

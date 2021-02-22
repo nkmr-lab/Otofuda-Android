@@ -72,19 +72,19 @@
                             app:sg_text_color_selected="#000000">
 
                         <com.marozzi.segmentedtab.SegmentedTab
-                                android:id="@+id/element1"
+                                android:id="@+id/cardCountSegmentTab2x2"
                                 android:layout_width="wrap_content"
                                 android:layout_height="match_parent"
                                 android:text="2x2" />
 
                         <com.marozzi.segmentedtab.SegmentedTab
-                                android:id="@+id/element2"
+                                android:id="@+id/cardCountSegmentTab3x3"
                                 android:layout_width="wrap_content"
                                 android:layout_height="match_parent"
                                 android:text="3x3" />
 
                         <com.marozzi.segmentedtab.SegmentedTab
-                                android:id="@+id/element3"
+                                android:id="@+id/cardCountSegmentTab4x4"
                                 android:layout_width="wrap_content"
                                 android:layout_height="match_parent"
                                 android:text="4x4" />
@@ -102,7 +102,8 @@
                 <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="80dp"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+                        android:visibility="gone">
 
                     <View
                             android:id="@+id/view1"
@@ -135,13 +136,13 @@
                             app:sg_text_color_selected="#000000">
 
                         <com.marozzi.segmentedtab.SegmentedTab
-                                android:id="@+id/element_one_one"
+                                android:id="@+id/usingMusicSegmentTabPreset"
                                 android:layout_width="wrap_content"
                                 android:layout_height="match_parent"
                                 android:text="プリセット" />
 
                         <com.marozzi.segmentedtab.SegmentedTab
-                                android:id="@+id/element_one_two"
+                                android:id="@+id/usingMusicSegmentTabDevice"
                                 android:layout_width="wrap_content"
                                 android:layout_height="match_parent"
                                 android:text="デバイス内" />
@@ -181,7 +182,8 @@
                 <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="80dp"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+                        android:visibility="gone">
 
 
                     <View
@@ -215,13 +217,13 @@
                             app:sg_text_color_selected="#000000">
 
                         <com.marozzi.segmentedtab.SegmentedTab
-                                android:id="@+id/element_one_one_2"
+                                android:id="@+id/playbackSegmentTabIntro"
                                 android:layout_width="wrap_content"
                                 android:layout_height="match_parent"
                                 android:text="イントロ" />
 
                         <com.marozzi.segmentedtab.SegmentedTab
-                                android:id="@+id/element_one_two_2"
+                                android:id="@+id/playbackSegmentTabRandom"
                                 android:layout_width="wrap_content"
                                 android:layout_height="match_parent"
                                 android:text="ランダム" />
@@ -239,7 +241,8 @@
                 <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="80dp"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+                        android:visibility="gone">
 
 
                     <View
@@ -273,13 +276,13 @@
                             app:sg_text_color_selected="#000000">
 
                         <com.marozzi.segmentedtab.SegmentedTab
-                                android:id="@+id/element_one_one_3"
+                                android:id="@+id/scoreSegmentTabNormal"
                                 android:layout_width="wrap_content"
                                 android:layout_height="match_parent"
                                 android:text="ノーマル" />
 
                         <com.marozzi.segmentedtab.SegmentedTab
-                                android:id="@+id/element_one_two_3"
+                                android:id="@+id/scoreSegmentTabBingo"
                                 android:layout_width="wrap_content"
                                 android:layout_height="match_parent"
                                 android:text="ビンゴ" />

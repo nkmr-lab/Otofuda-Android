@@ -70,7 +70,21 @@ class CreateGroupVC : AppCompatActivity() {
         val roomId = getRandomStringWithLength(6)
         val roomRef = database.getReference("rooms/" + roomId)
         var member = listOf<String>(uuid)
-        val mode = mapOf("playback" to "intro", "score" to "normal", "usingMusic" to "preset")
+
+        val cardColumnCount = resources.getInteger(R.integer.cardColumnCount)
+        val cardRowCount = resources.getInteger(R.integer.cardRowCount)
+        val cardCount = cardColumnCount * cardRowCount
+        var cardCountStr = "4x4"
+
+        if( cardCount == 2*2 ){
+            cardCountStr = "2x2"
+        } else if( cardCount == 3*3 ){
+            cardCountStr = "3x3"
+        } else {
+            cardCountStr = "4x4"
+        }
+
+        val mode = mapOf("playback" to "intro", "score" to "normal", "usingMusic" to "preset", "cardCount" to cardCountStr)
         val status = "menu"
         val current = Date()
         val format = SimpleDateFormat("yyyy-MM-dd-HH-mm", Locale.getDefault())

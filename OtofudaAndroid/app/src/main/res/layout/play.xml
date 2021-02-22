@@ -30,13 +30,24 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"></androidx.recyclerview.widget.RecyclerView>
 
-            <Button
-                    android:id="@+id/button4"
-                    android:layout_width="154dp"
-                    android:layout_height="46dp"
-                    android:layout_gravity="right|bottom"
-                    android:background="@drawable/badge"
-                    android:onClick="onBadgeButtonTapped" />
+
+            <FrameLayout
+                    android:id="@+id/badgeFrame"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="#FFF"
+                    android:layout_gravity="right|bottom">
+
+                    <Button
+                            android:id="@+id/button4"
+                            android:layout_width="155.5dp"
+                            android:layout_height="42dp"
+                            android:layout_margin="10.5dp"
+                            android:layout_gravity="center|center"
+                            android:background="@drawable/badge"
+                            android:onClick="onBadgeButtonTapped" />
+
+            </FrameLayout>
 
             <TextView
                     android:id="@+id/otetsukiView"
