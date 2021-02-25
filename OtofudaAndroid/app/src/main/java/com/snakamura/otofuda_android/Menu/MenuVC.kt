@@ -1,4 +1,4 @@
-package com.example.otofuda_android.Menu
+package com.snakamura.otofuda_android.Menu
 
 import android.content.Intent
 import android.os.Build
@@ -9,9 +9,9 @@ import android.view.View
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import com.example.otofuda_android.Play.PlayVC
-import com.example.otofuda_android.R
-import com.example.otofuda_android.Response.*
+import com.snakamura.otofuda_android.Play.PlayVC
+import com.snakamura.otofuda_android.R
+import com.snakamura.otofuda_android.Response.*
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener

@@ -1,32 +1,27 @@
 
-package com.example.otofuda_android.Top
+package com.snakamura.otofuda_android.Top
 
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import com.example.otofuda_android.R
+import com.snakamura.otofuda_android.R
 import com.google.zxing.BarcodeFormat
 import com.journeyapps.barcodescanner.BarcodeEncoder
-import com.example.otofuda_android.Extensions.*
-import com.example.otofuda_android.Menu.MenuVC
+import com.snakamura.otofuda_android.Extensions.*
+import com.snakamura.otofuda_android.Menu.MenuVC
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
-import kotlinx.android.synthetic.main.create_group.*
 import java.text.SimpleDateFormat
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.util.*
 
 class CreateGroupVC : AppCompatActivity() {

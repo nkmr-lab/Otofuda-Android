@@ -1,4 +1,4 @@
-package com.example.otofuda_android.Top
+package com.snakamura.otofuda_android.Top
 
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -6,24 +6,20 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.example.otofuda_android.Menu.MenuVC
-import com.example.otofuda_android.R
-import com.example.otofuda_android.Response.Room
+import com.snakamura.otofuda_android.Menu.MenuVC
+import com.snakamura.otofuda_android.R
+import com.snakamura.otofuda_android.Response.Room
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.database.ktx.getValue
 import com.google.firebase.ktx.Firebase
-import com.google.zxing.BarcodeFormat
 import com.google.zxing.ResultPoint
 import com.journeyapps.barcodescanner.BarcodeCallback
-import com.journeyapps.barcodescanner.BarcodeEncoder
 import com.journeyapps.barcodescanner.BarcodeResult
 import com.journeyapps.barcodescanner.CompoundBarcodeView
 

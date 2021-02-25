@@ -1,4 +1,4 @@
-package com.example.otofuda_android.Response
+package com.snakamura.otofuda_android.Response
 
 data class PresetResponse (
     val result: String,

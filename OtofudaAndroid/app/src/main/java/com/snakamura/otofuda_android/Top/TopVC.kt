@@ -1,38 +1,16 @@
-package com.example.otofuda_android.Top
+package com.snakamura.otofuda_android.Top
 
 import android.content.Intent
-import android.graphics.Color
-import android.media.MediaPlayer
-import android.net.Uri
 
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.view.animation.Animation
-import android.view.animation.AnimationUtils
-import android.view.animation.RotateAnimation
-import android.widget.Button
-import android.widget.TextView
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.example.otofuda_android.R
-import com.example.otofuda_android.Response.PresetResponse
-import com.google.firebase.database.ktx.database
-import com.google.firebase.ktx.Firebase
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.list_item.view.*
-import retrofit2.Call
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.GET
+import com.snakamura.otofuda_android.R
 import java.util.*
-import kotlin.concurrent.thread
 
 class TopVC : AppCompatActivity() {
 

@@ -1,4 +1,4 @@
-package com.example.otofuda_android.Play
+package com.snakamura.otofuda_android.Play
 
 import android.content.Intent
 import android.graphics.Color
@@ -15,10 +15,10 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.otofuda_android.R
-import com.example.otofuda_android.Response.Music
-import com.example.otofuda_android.Response.Room
-import com.example.otofuda_android.Result.ResultVC
+import com.snakamura.otofuda_android.R
+import com.snakamura.otofuda_android.Response.Music
+import com.snakamura.otofuda_android.Response.Room
+import com.snakamura.otofuda_android.Result.ResultVC
 import com.google.firebase.database.ktx.database
 import com.google.firebase.database.ktx.getValue
 import com.google.firebase.ktx.Firebase
@@ -30,7 +30,7 @@ import kotlin.collections.ArrayList
 import kotlin.concurrent.schedule
 import android.media.AudioAttributes
 import android.media.SoundPool
-import com.example.otofuda_android.Menu.MenuVC
+import com.snakamura.otofuda_android.Menu.MenuVC
 import com.google.firebase.database.*
 
 class PlayVC : AppCompatActivity() {

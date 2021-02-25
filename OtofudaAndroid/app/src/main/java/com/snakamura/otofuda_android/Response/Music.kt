@@ -1,4 +1,4 @@
-package com.example.otofuda_android.Response
+package com.snakamura.otofuda_android.Response
 
 import com.google.firebase.database.IgnoreExtraProperties
 import java.io.Serializable

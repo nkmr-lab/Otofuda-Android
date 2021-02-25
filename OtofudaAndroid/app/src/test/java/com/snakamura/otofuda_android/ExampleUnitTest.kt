@@ -1,4 +1,4 @@
-package com.example.otofuda_android
+package com.snakamura.otofuda_android
 
 import org.junit.Test
 

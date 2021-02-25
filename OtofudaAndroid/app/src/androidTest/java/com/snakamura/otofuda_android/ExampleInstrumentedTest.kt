@@ -1,4 +1,4 @@
-package com.example.otofuda_android
+package com.snakamura.otofuda_android
 
 import android.support.test.InstrumentationRegistry
 import android.support.test.runner.AndroidJUnit4

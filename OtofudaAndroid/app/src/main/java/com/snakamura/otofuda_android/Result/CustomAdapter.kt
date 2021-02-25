@@ -1,4 +1,4 @@
-package com.example.otofuda_android.Result
+package com.snakamura.otofuda_android.Result
 
 import android.view.LayoutInflater
 import android.view.View
@@ -6,8 +6,8 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.otofuda_android.R
-import com.example.otofuda_android.Response.Music
+import com.snakamura.otofuda_android.R
+import com.snakamura.otofuda_android.Response.Music
 
 class CustomAdapter(private val musicList: ArrayList<Music>): RecyclerView.Adapter<CustomAdapter.ViewHolder>() {
 

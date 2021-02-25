@@ -1,10 +1,9 @@
-package com.example.otofuda_android.Result
+package com.snakamura.otofuda_android.Result
 
 import android.content.Intent
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.net.Uri
-import android.opengl.Visibility
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -15,9 +14,9 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.otofuda_android.Menu.MenuVC
-import com.example.otofuda_android.R
-import com.example.otofuda_android.Response.Music
+import com.snakamura.otofuda_android.Menu.MenuVC
+import com.snakamura.otofuda_android.R
+import com.snakamura.otofuda_android.Response.Music
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
